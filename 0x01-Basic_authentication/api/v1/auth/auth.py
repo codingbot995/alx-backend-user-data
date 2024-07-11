@@ -1,40 +1,57 @@
 
 #!/usr/bin/env python3
-"""Authentication module for the API.
+"""Handle Basic Authentication
+for Users
 """
-import re
-from typing import List, TypeVar
 from flask import request
+from fnmatch import fnmatch
+from typing import List, TypeVar
 
 
 class Auth:
-    """Authentication class.
+    """Auth Class
     """
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
-        """Checks if a path requires authentication.
+        """requires authentication
+
+        Args:
+            path (str): url
+            excluded_paths (List[str]): excluded url
+
+        Returns:
+            bool: returns False or True
         """
         if path is not None and excluded_paths is not None:
-            for exclusion_path in map(lambda x: x.strip(), excluded_paths):
-                pattern = ''
-                if exclusion_path[-1] == '*':
-                    pattern = '{}.*'.format(exclusion_path[0:-1])
-                elif exclusion_path[-1] == '/':
-                    pattern = '{}/*'.format(exclusion_path[0:-1])
-                else:
-                    pattern = '{}/*'.format(exclusion_path)
-                if re.match(pattern, path):
+            if not path.endswith("/"):
+                path += '/'
+            for pat in excluded_paths:
+                if not pat.endswith("*"):
+                    pat += "*"
+                if fnmatch(path, pat):
                     return False
         return True
 
     def authorization_header(self, request=None) -> str:
-        """Gets the authorization header field from the request.
+        """authorize header
+
+        Args:
+            request (_type_, optional):the request. Defaults to None.
+
+        Returns:
+            str: returns None
         """
         if request is not None:
-            return request.headers.get('Authorization', None)
+            return request.headers.get("Authorization", None)
         return None
 
     def current_user(self, request=None) -> TypeVar('User'):
-        """Gets the current user from the request.
+        """returns current user
+
+        Args:
+            request (_type_, optional):the request. Defaults to None.
+
+        Returns:
+            TypeVar: returns None
         """
         return None
 
